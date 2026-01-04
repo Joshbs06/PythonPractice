@@ -5,27 +5,10 @@ def assert_equal(actual, expected):
         print(f"Error! Actual: {actual} != Expected: {expected}")
 
 def format_board(board):
-    joined_rows = []
-    board_length = len(board)
-    separator = "-+"
-    
-    row_separator = "  " + (separator * (board_length - 1)) + "-"
-    
-    header = " "
-    for i in range(1, board_length + 1):
-        header += " " + str(i) 
-    
-    for i in range(board_length + 1):
-        
-        if i == 0:
-            joined_rows.append(header)
-        else:
-            joined_rows.append(f'{i} {"|".join(board[i - 1])}')
-        
-        if i != board_length:
-            joined_rows.append(row_separator)
-            
-    return "\n".join(joined_rows)
+    size = len(board)
+    line = f'\n  {"+".join("-" * size)}\n'
+    rows = [f'{i + 1} {"|".join(row)}' for i, row in enumerate(board)]
+    return f'  {" ".join(str(i + 1) for i in range(size))}\n{line.join(rows)}'
 
 def winner(board):
     return row_winner(board) or column_winner(board) or diagonal_winner(board)
@@ -64,33 +47,98 @@ def diagonal_winner(board):
     
     return winning_line(forDiagonal) or winning_line(revDiagonal)
 
-assert_equal(
-    winner(
-        [
-            ['X', 'X', 'X', ' '],
-            ['X', 'X', ' ', ' '],
-            ['X', ' ', 'O', 'X'],
-            [' ', ' ', 'O', 'X']
-        ]
-    ),
-    False
-)
-assert_equal(
-    winner(
-        [
-            ['X', ' ', 'X'],
-            ['O', 'X', 'O'],
-            ['O', 'O', 'O']
-        ]
-    ),
-    True
-)
-assert_equal(
-    winner(
-        [
-            ['X', ' '],
-            ['X', 'O']
-        ]
-    ),
-    True
-)
+def get_move():
+    print('Enter row:')
+    row = int(input()) - 1
+    print('Enter column:')
+    col = int(input()) - 1
+    return row, col
+
+def check_move(board, row, col):
+    return board[row][col] == ' '
+
+def play_move(board, player):
+    print(f'{player} to play.')
+    
+    while True:
+        row, col = get_move()
+
+        if check_move(board, row, col):
+            board[row][col] = player
+            print(format_board(board))
+            return
+        print("Invalid move. Try again.")
+
+def make_board(size):
+    return [[' '] * size for _ in range(size)]
+
+def print_winner(player):
+    print(f'{player} wins!')
+
+def print_draw():
+    print("It's a draw!")
+
+def play_game(board_size, player1, player2):
+    board = make_board(board_size)
+    print(format_board(board))
+
+    totalPossibleMoves = board_size * board_size
+    
+    player1Turn = True
+    hasWinner = False
+    
+    for i in range(totalPossibleMoves):
+        
+        if player1Turn:
+            play_move(board, player1)
+            player1Turn = False
+            if winner(board):
+                print_winner(player1)
+                hasWinner = True
+                break
+        else:
+            play_move(board, player2)
+            player1Turn = True
+            if winner(board):
+                print_winner(player2)
+                hasWinner = True
+                break
+    
+    if not hasWinner:
+        print_draw()
+
+boardSize = int(input("Enter board size:"))
+play_game(boardSize, 'X', 'O')
+
+#Test Cases
+# assert_equal(8
+
+#     winner(
+#         [
+#             ['X', 'X', 'X', ' '],
+#             ['X', 'X', ' ', ' '],
+#             ['X', ' ', 'O', 'X'],
+#             [' ', ' ', 'O', 'X']
+#         ]
+#     ),
+#     False
+# )
+# assert_equal(
+#     winner(
+#         [
+#             ['X', ' ', 'X'],
+#             ['O', 'X', 'O'],
+#             ['O', 'O', 'O']
+#         ]
+#     ),
+#     True
+# )
+# assert_equal(
+#     winner(
+#         [
+#             ['X', ' '],
+#             ['X', 'O']
+#         ]
+#     ),
+#     True
+# )

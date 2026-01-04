@@ -5,14 +5,27 @@ def assert_equal(actual, expected):
         print(f"Error! Actual: {actual} != Expected: {expected}")
 
 def format_board(board):
-    result = ""
-    for i in range(len(board)):
-        for char in board[i]:
-            result += char
+    joined_rows = []
+    board_length = len(board)
+    separator = "-+"
+    
+    row_separator = "  " + (separator * (board_length - 1)) + "-"
+    
+    header = " "
+    for i in range(1, board_length + 1):
+        header += " " + str(i) 
+    
+    for i in range(board_length + 1):
         
-        if i != len(board) - 1:
-            result += '\n'
-    return result
+        if i == 0:
+            joined_rows.append(header)
+        else:
+            joined_rows.append(f'{i} {"|".join(board[i - 1])}')
+        
+        if i != board_length:
+            joined_rows.append(row_separator)
+            
+    return "\n".join(joined_rows)
 
 def winner(board):
     return row_winner(board) or column_winner(board) or diagonal_winner(board)
@@ -100,6 +113,54 @@ def diagonal_winner(board):
     
     return forMatches or revMatches
 
+def play_move(board, player):
+    print(f'{player} to play:')
+    row = int(input()) - 1
+    col = int(input()) - 1
+    board[row][col] = player
+    print(format_board(board))
+
+def make_board(size):
+    return [[' '] * size for _ in range(size)]
+
+def print_winner(player):
+    print(f'{player} wins!')
+
+def print_draw():
+    print("It's a draw!")
+
+def play_game(board_size, player1, player2):
+    board = make_board(board_size)
+    print(format_board(board))
+
+    totalPossibleMoves = board_size * board_size
+    
+    player1Turn = True
+    hasWinner = False
+    
+    for i in range(totalPossibleMoves):
+        
+        if player1Turn:
+            play_move(board, player1)
+            player1Turn = False
+            if winner(board):
+                print_winner(player1)
+                hasWinner = True
+                break
+        else:
+            play_move(board, player2)
+            player1Turn = True
+            if winner(board):
+                print_winner(player2)
+                hasWinner = True
+                break
+    
+    if not hasWinner:
+        print_draw()
+
+play_game(3, 'X', 'O')
+
+#Test Cases
 assert_equal(
     diagonal_winner(
         [
